@@ -1,0 +1,64 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>p2</title></head><body>
+<script>
+function t(name, fn) {
+  try { return '' + fn(); } catch (e) { return 'ERR: ' + (e && (e.message || e)); }
+}
+(async () => {
+  const info = {};
+  info.ua = navigator.userAgent;
+  info.coop = typeof SharedArrayBuffer !== 'undefined';
+  // memory64 variants
+  info.m64 = t('m64', () => new WebAssembly.Memory({initial:1, maximum:1, index:'i64'}) ? 'ok' : '?');
+  info.m64shared = t('m64s', () => new WebAssembly.Memory({initial:1, maximum:2, index:'i64', shared:true}) ? 'ok' : '?');
+  info.m32shared = t('m32s', () => new WebAssembly.Memory({initial:1, maximum:2, shared:true}) ? 'ok' : '?');
+  // multi-memory: module with 2 memories
+  info.multimem = t('mm', () => {
+    const b = new Uint8Array([0,97,115,109,1,0,0,0,5,5,2,0,1,0,1]);
+    new WebAssembly.Module(b); return 'ok';
+  });
+  // extended-const: global init i32.const + i32.add
+  info.extconst = t('ec', () => {
+    const b = new Uint8Array([0,97,115,109,1,0,0,0,6,10,1,127,1,65,1,65,2,106,11]);
+    new WebAssembly.Module(b); return 'ok';
+  });
+  // stringref: function param of type stringref (0x67)
+  info.stringref = t('sr', () => {
+    const b = new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,1,103,0]);
+    new WebAssembly.Module(b); return 'ok';
+  });
+  // exnref: param of type exnref (0x69)
+  info.exnref_t = t('ex', () => {
+    const b = new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,1,105,0]);
+    new WebAssembly.Module(b); return 'ok';
+  });
+  // try_table opcode (new EH)
+  info.trytable = t('tt', () => {
+    const b = new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,3,2,1,0,10,8,1,6,0,31,0,64,11,11]);
+    new WebAssembly.Module(b); return 'ok';
+  });
+  // legacy EH baseline (tag/try-catch)
+  info.legacyeh = t('le', () => { return typeof WebAssembly.Tag === 'function' ? 'ok' : 'no'; });
+  // JSPI all API shapes
+  info.suspending = typeof WebAssembly.Suspending;
+  info.suspender = typeof WebAssembly.Suspender;
+  info.promising = typeof WebAssembly.promising;
+  info.wafn = typeof WebAssembly.Function;
+  // JS staging features
+  info.temporal = typeof Temporal;
+  info.sharedstruct = typeof SharedStructType;
+  info.using = t('us', () => { new Function('using x = {};'); return 'ok'; });
+  // wasm gc baseline: struct
+  info.gcbaseline = t('gc', () => {
+    const b = new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,95,1,126,1]);
+    new WebAssembly.Module(b); return 'ok';
+  });
+  // tail call baseline
+  info.tailcall = t('tc', () => {
+    const b = new Uint8Array([0,97,115,109,1,0,0,0,1,4,1,96,0,0,3,2,1,0,10,7,1,5,0,12,0,11,11]);
+    new WebAssembly.Module(b); return 'ok';
+  });
+  await fetch('https://webhook.site/5116bd14-ab5f-416b-aba1-0e5640d707e7?d=' + encodeURIComponent(JSON.stringify(info)), {mode:'no-cors'});
+  document.title = JSON.stringify(info);
+  document.body.innerHTML = '<pre style="font-size:6px">' + JSON.stringify(info, null, 1) + '</pre>';
+})();
+</script></body></html>
